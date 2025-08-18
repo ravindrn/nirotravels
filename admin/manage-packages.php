@@ -2,6 +2,8 @@
 require_once 'includes/auth_check.php';
 require_once 'includes/db.php';
 
+
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_package'])) {
