@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_offer'])) {
 }
 
 // Get all special offers
-$special_offers = mysqli_query($conn, "SELECT * FROM special_offers ORDER BY sort_order ASC");
+$special_offers = mysqli_query($conn, "SELECT * FROM special_offers ");
 
 // ==================== TESTIMONIALS MANAGEMENT ====================
 
@@ -448,139 +448,8 @@ $testimonials = mysqli_query($conn, "SELECT * FROM testimonials ORDER BY sort_or
 </body>
 </html>
 
-<!-- ==================== SPECIAL OFFERS SECTION ==================== -->
-<div id="offers-section" class="mt-5 pt-4 border-top">
-    <h2>Manage Special Offers</h2>
-    
-    <!-- Add New Offer Form -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Add New Special Offer</h5>
-        </div>
-        <div class="card-body">
-            <form method="POST" enctype="multipart/form-data">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Title:</label>
-                        <input type="text" name="title" class="form-control" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Price:</label>
-                        <input type="text" name="price" class="form-control" placeholder="$99">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Description:</label>
-                        <textarea name="description" class="form-control" rows="3" required></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Image:</label>
-                        <input type="file" name="offer_image" class="form-control" required>
-                        <small class="text-muted">Recommended size: 800x600px</small>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Sort Order:</label>
-                        <input type="number" name="sort_order" class="form-control" value="0">
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="is_available" id="is_available" checked>
-                            <label class="form-check-label" for="is_available">Available</label>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <input type="hidden" name="add_offer" value="1">
-                        <button type="submit" class="btn btn-primary">Add Offer</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Current Offers -->
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Current Special Offers</h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                            <th>Sort</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($offer = mysqli_fetch_assoc($special_offers)): ?>
-                        <tr>
-                            <td><img src="../assets/img/destinations/<?= htmlspecialchars($offer['image']) ?>" width="80"></td>
-                            <td><?= htmlspecialchars($offer['title']) ?></td>
-                            <td><?= htmlspecialchars(substr($offer['description'], 0, 50)) ?>...</td>
-                            <td><?= htmlspecialchars($offer['price']) ?></td>
-                            <td>
-                                <span class="badge <?= $offer['is_available'] ? 'bg-success' : 'bg-secondary' ?>">
-                                    <?= $offer['is_available'] ? 'Available' : 'Not Available' ?>
-                                </span>
-                            </td>
-                            <td><?= $offer['sort_order'] ?></td>
-                            <td class="actions">
-                                <div class="d-flex gap-2">
-                                    <!-- Update Form -->
-                                    <form method="POST" enctype="multipart/form-data" class="flex-grow-1">
-                                        <input type="hidden" name="update_offer" value="1">
-                                        <input type="hidden" name="offer_id" value="<?= $offer['id'] ?>">
-                                        <input type="hidden" name="existing_image" value="<?= htmlspecialchars($offer['image']) ?>">
-                                        
-                                        <div class="row g-2">
-                                            <div class="col-12">
-                                                <input type="text" name="title" value="<?= htmlspecialchars($offer['title']) ?>" class="form-control form-control-sm" required>
-                                            </div>
-                                            <div class="col-12">
-                                                <textarea name="description" class="form-control form-control-sm" rows="2" required><?= htmlspecialchars($offer['description']) ?></textarea>
-                                            </div>
-                                            <div class="col-6">
-                                                <input type="text" name="price" value="<?= htmlspecialchars($offer['price']) ?>" class="form-control form-control-sm">
-                                            </div>
-                                            <div class="col-6">
-                                                <input type="file" name="offer_image" class="form-control form-control-sm">
-                                            </div>
-                                            <div class="col-4">
-                                                <input type="number" name="sort_order" value="<?= $offer['sort_order'] ?>" class="form-control form-control-sm">
-                                            </div>
-                                            <div class="col-4">
-                                                <div class="form-check form-switch">
-                                                    <input class="form-check-input" type="checkbox" name="is_available" id="available_<?= $offer['id'] ?>" <?= $offer['is_available'] ? 'checked' : '' ?>>
-                                                    <label class="form-check-label" for="available_<?= $offer['id'] ?>">Available</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-4">
-                                                <button type="submit" class="btn btn-sm btn-warning w-100">Update</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    
-                                    <!-- Delete Button -->
-                                    <form method="GET" class="align-self-end">
-                                        <input type="hidden" name="delete_offer" value="<?= $offer['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger h-100" onclick="return confirm('Are you sure?');">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+
+
 
 <!-- ==================== TESTIMONIALS SECTION ==================== -->
 <div id="testimonials-section" class="mt-5 pt-4 border-top">

@@ -4,7 +4,6 @@
 /* Navbar Styles */
 body {
   background-color: white;
-  font-family: 'Poppins', sans-serif;
 }
 
 
@@ -12,36 +11,7 @@ body {
 
 
 
-/* Home Section */
-.card {
-  border: none;
-  border-radius: 30px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  width: 100%;
-  max-width: 1500px;
-  margin: 0 auto;
-}
 
-.card-img-top {
-  height: 700px;
-  object-fit: cover;
-}
-
-.card-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 3.8rem;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.card-text {
-  font-family: 'Poppins', sans-serif;
-  color: #f9f7f7;
-  font-size: 0.80rem;
-}
 
 /* Responsive Media Queries */
 @media (max-width: 991.98px) {

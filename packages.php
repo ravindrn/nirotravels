@@ -2,6 +2,7 @@
 // packages.php
 require_once 'admin/includes/db.php';
 
+
 $packageId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $current_date = date('Y-m-d');
 
@@ -52,45 +53,526 @@ if ($packageId > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $packageDetails ? htmlspecialchars($packageDetails['title']) : 'Tour Packages' ?> | Niro SL Travels</title>
+    <title><?= $packageDetails ? htmlspecialchars($packageDetails['title']) : 'Travel Packages' ?> | Niro SL Travels</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .price-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 0.9rem;
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Mozilla+Headline:wght@200..700&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <style>    
+    :root {
+            --primary: #1a1a1a;
+            --secondary: #2d3748;
+            --accent: #4a5568;
+            --light: #f7fafc;
+            --text-light: rgba(255, 255, 255, 0.9);
+            --text-dark: #2d3748;
+            --overlay: rgba(0, 0, 0, 0.6);
         }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+         
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        p{
+            font-family: 'Urbanist';
+        }
+
+
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), 
+                        url('assets/img/1.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 103vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            margin-bottom: 0;
+        }
+        
+        .hero-content h1 {
+            font-family: 'Playfair Display';
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -2px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .hero-content .subtitle {
+            font-size: 1.5rem;
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.95;
+            margin-bottom: 2rem;
+        }
+        
+        .hero-content p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* Main Container */
+        .packages-container {
+            background: white;
+            margin-top: -100px;
+            position: relative;
+            z-index: 10;
+            padding: 80px 0 60px;
+            min-height: 100vh;
+        }
+        
+        /* Package Grid */
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        /* Package Cards */
+        .package-card {
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            height: 500px;
+            cursor: pointer;
+        }
+        
+        .package-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+        }
+        
+        .package-card-image {
+            position: relative;
+            height: 60%;
+            overflow: hidden;
+        }
+        
+        .package-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        
+        .package-card:hover .package-card-image img {
+            transform: scale(1.1);
+        }
+        
+        .package-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
+            color: white;
+        }
+        
+        .duration-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            color: var(--primary);
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+        
+        .package-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        
+        .package-description {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .package-card-body {
+            padding: 25px;
+            height: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .package-features {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+        
+        .feature-item i {
+            margin-right: 6px;
+            font-size: 1rem;
+        }
+        
+        .package-pricing {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .price-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .price-from {
+            font-size: 0.8rem;
+            color: var(--accent);
+            margin-bottom: 2px;
+        }
+        
+        .price-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
         .original-price {
             text-decoration: line-through;
-            color: #6c757d;
+            color: #999;
+            font-size: 1rem;
+            margin-right: 8px;
+        }
+        
+        .offer-price {
+            color: #e53e3e;
+            font-weight: 700;
+        }
+        
+        .learn-more-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .learn-more-btn:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* Single Package View Styles */
+        .single-package {
+            background: white;
+            margin-top: -100px;
+            position: relative;
+            z-index: 10;
+            padding: 60px 0;
+        }
+        
+        .package-hero-image {
+            overflow: hidden;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        
+        .package-hero-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+        
+        .package-info-card {
+            background: white;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+        }
+        
+        .info-header {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .info-header h3 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .duration-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .duration-info {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .duration-info i {
+            margin-right: 8px;
+            color: var(--accent);
+        }
+        
+        .price-display {
+            text-align: right;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-content .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .packages-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .package-card {
+                height: auto;
+                min-height: 450px;
+            }
+            
+            .packages-container {
+                padding: 60px 20px 40px;
+                margin-top: -80px;
+           
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+            
+            .package-overlay {
+                padding: 20px;
+            }
+            
+            .package-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .package-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .package-card:nth-child(1) { animation-delay: 0.1s; }
+        .package-card:nth-child(2) { animation-delay: 0.2s; }
+        .package-card:nth-child(3) { animation-delay: 0.3s; }
+        .package-card:nth-child(4) { animation-delay: 0.4s; }
+        .package-card:nth-child(5) { animation-delay: 0.5s; }
+        .package-card:nth-child(6) { animation-delay: 0.6s; }
+        
+        /* Special Offers Alert */
+        .special-offers-alert {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .special-offers-alert h4 {
+            margin-bottom: 8px;
+        }
+        
+        /* Inclusions/Exclusions Lists */
+        .inclusion-item, .exclusion-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
             font-size: 0.9rem;
         }
-        .offer-price {
+        
+        .inclusion-item:last-child,
+        .exclusion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .inclusion-item i {
+            color: #28a745;
+        }
+        
+        .exclusion-item i {
             color: #dc3545;
-            font-weight: bold;
-            font-size: 1.1rem;
         }
-        .offer-card {
-            border-left: 4px solid #dc3545;
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
         }
-        .days-left-badge {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background-color: #ffc107;
-            color: #000;
+        
+        .action-btn {
+            padding: 12px 20px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.95rem;
         }
-        .select2-container--default .select2-selection--single {
-            height: 38px;
-            padding: 5px;
-            border: 1px solid #ced4da;
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px;
+        
+        .btn-success {
+            background: #25D366;
+            color: white;
         }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        /* Additional Floating Button Styles */
+        .floating-btn {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            border: none;
+            animation: pulse 2s infinite;
+        }
+
+        .floating-btn.whatsapp {
+            bottom: 30px;
+            right: 30px;
+            background: #25D366;
+            color: white;
+        }
+
+        .floating-btn.back-to-top {
+            bottom: 100px;
+            right: 30px;
+            background: var(--primary);
+            color: white;
+            display: none;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        @keyframes pulse {
+            0% { 
+                transform: scale(1);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+            }
+            100% { 
+                transform: scale(1);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .floating-btn {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .floating-btn.back-to-top {
+                bottom: 80px;
+                right: 20px;
+            }
+            
+            .floating-btn i {
+                font-size: 1.4rem !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -98,204 +580,182 @@ if ($packageId > 0) {
 <!-- Header -->
 <?php include 'components/header.php' ?>
 
-<main class="container my-5">
-    <?php if ($packageId > 0 && $packageDetails): ?>
-        <!-- Single Package View -->
-        <div class="row">
-            <div class="col-md-8">
-                <h1><?= htmlspecialchars($packageDetails['title']) ?></h1>
-                
-                <?php if (!empty($packageOffers)): ?>
-                <div class="alert alert-success mb-4">
-                    <h4><i class="bi bi-tag-fill"></i> Special Offers Available!</h4>
-                    <p class="mb-0">Book now to take advantage of these limited-time discounts.</p>
-                </div>
-                <?php endif; ?>
-                
-                <div class="package-image mb-4 position-relative">
-                    <img src="uploads/packages/<?= htmlspecialchars($packageDetails['image']) ?>" 
-                         alt="<?= htmlspecialchars($packageDetails['title']) ?>" 
-                         class="img-fluid rounded">
-                    <?php if (!empty($packageOffers)): ?>
-                    <span class="badge bg-danger price-badge">
-                        Save up to <?= 
-                            $packageDetails['price_range'] && $packageOffers[0]['offer_price'] 
-                            ? round(100 - (($packageOffers[0]['offer_price'] / 
-                              floatval(str_replace(['$', ','], '', $packageDetails['price_range']))) * 100) )
-                            : '0' 
-                        ?>%
-                    </span>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="package-description mb-4">
-                    <?= nl2br(htmlspecialchars($packageDetails['description'])) ?>
-                </div>
-                
-                <div class="package-itinerary mb-4">
-                    <h3>Itinerary</h3>
-                    <?= nl2br(htmlspecialchars($packageDetails['itinerary'])) ?>
-                </div>
+<?php if ($packageId > 0 && $packageDetails): ?>
+    <!-- Single Package Hero -->
+    <div class="hero-section" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('<?= !empty($packageDetails['hero_image']) ? 'uploads/hero_images/' . htmlspecialchars($packageDetails['hero_image']) : 'uploads/packages/' . htmlspecialchars($packageDetails['image']) ?>'); background-size: cover; background-position: center;">
+        <div class="hero-content">
+            <h1><?= htmlspecialchars($packageDetails['title']) ?></h1>
+            <p class="subtitle">Crafted for You</p>
+            <p><?= substr(htmlspecialchars($packageDetails['description']), 0, 150) ?>...</p>
+        </div>
+    </div>
+    
+    <!-- Single Package Content -->
+    <div class="single-package">
+        <div class="container">
+            <?php if (!empty($packageOffers)): ?>
+            <div class="alert special-offers-alert" role="alert">
+                <h4><i class="bi bi-tag-fill me-2"></i>Special Offers Available!</h4>
+                <p class="mb-0">Book now to take advantage of these limited-time discounts.</p>
             </div>
+            <?php endif; ?>
             
-            <div class="col-md-4">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Package Details</h4>
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="package-hero-image">
+                        <img src="uploads/packages/<?= htmlspecialchars($packageDetails['image']) ?>" 
+                             alt="<?= htmlspecialchars($packageDetails['title']) ?>" 
+                             class="img-fluid">
                     </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush mb-3">
-                            <li class="list-group-item">
-                                <strong>Duration:</strong> <?= htmlspecialchars($packageDetails['duration']) ?> days
-                            </li>
-                            <li class="list-group-item">
-                                <strong>Price:</strong> 
-                                <?php if (!empty($packageOffers)): ?>
-                                    <span class="original-price">$<?= number_format(floatval(str_replace(['$', ','], '', $packageDetails['price_range'])), 2) ?> per person</span>
-                                    <span class="text-danger fw-bold"> $<?= number_format($packageOffers[0]['offer_price'], 2) ?> per person</span>
-                                <?php else: ?>
-                                    $<?= number_format(floatval(str_replace(['$', ','], '', $packageDetails['price_range'])), 2) ?> per person
-                                <?php endif; ?>
-                            </li>
-                        </ul>
+                    
+                    <div class="package-info-card mb-4">
+                        <h3>About This Package</h3>
+                        <div class="package-content">
+                            <?= nl2br(htmlspecialchars($packageDetails['description'])) ?>
+                        </div>
+                    </div>
+                    
+                    <div class="package-info-card">
+                        <h3>Detailed Itinerary</h3>
+                        <div class="itinerary-content">
+                            <?= nl2br(htmlspecialchars($packageDetails['itinerary'])) ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="package-info-card">
+                        <div class="info-header">
+                            <h3>Package Details</h3>
+                            <div class="duration-price">
+                                <div class="duration-info">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <?= htmlspecialchars($packageDetails['duration']) ?> Days
+                                </div>
+                                <div class="price-display">
+                                    <?php if (!empty($packageOffers)): ?>
+                                        <div class="original-price">$<?= number_format(floatval(str_replace(['$', ','], '', $packageDetails['price_range'])), 2) ?></div>
+                                        <div class="offer-price">$<?= number_format($packageOffers[0]['offer_price'], 2) ?></div>
+                                        <small class="text-muted">per person</small>
+                                    <?php else: ?>
+                                        <div class="price-amount">$<?= number_format(floatval(str_replace(['$', ','], '', $packageDetails['price_range'])), 2) ?></div>
+                                        <small class="text-muted">per person</small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="mb-4">
-                            <h5>Inclusions</h5>
-                            <ul class="list-unstyled">
-                                <?php foreach (explode("\n", $packageDetails['inclusions']) as $inclusion): ?>
-                                    <?php if (!empty(trim($inclusion))): ?>
-                                        <li><i class="bi bi-check-circle text-success me-2"></i><?= htmlspecialchars(trim($inclusion)) ?></li>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <h5>Exclusions</h5>
-                            <ul class="list-unstyled">
-                                <?php foreach (explode("\n", $packageDetails['exclusions']) as $exclusion): ?>
-                                    <?php if (!empty(trim($exclusion))): ?>
-                                        <li><i class="bi bi-x-circle text-danger me-2"></i><?= htmlspecialchars(trim($exclusion)) ?></li>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                
-                <?php if (!empty($packageOffers)): ?>
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-danger text-white">
-                        <h4 class="mb-0">Special Offers</h4>
-                    </div>
-                    <div class="card-body p-0">
-                        <?php foreach ($packageOffers as $offer): 
-                            $days_left = floor((strtotime($offer['end_date']) - time()) / (60 * 60 * 24));
-                            $discount_text = $offer['discount_type'] === 'percentage' 
-                                ? $offer['discount_value'] . '% OFF' 
-                                : '$' . $offer['discount_value'] . ' OFF';
-                        ?>
-                        <div class="p-3 offer-card">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h5 class="mb-1"><?= $discount_text ?></h5>
-                                    <p class="mb-1">
-                                        <span class="original-price">$<?= number_format($offer['original_price'], 2) ?> per person</span>
-                                        <span class="offer-price"> $<?= number_format($offer['offer_price'], 2) ?> per person</span>
-                                    </p>
-                                </div>
-                                <?php if ($days_left <= 7): ?>
-                                <span class="badge bg-warning text-dark">
-                                    <?= $days_left === 1 ? 'Last day!' : ($days_left . ' days left') ?>
-                                </span>
+                            <h5 class="mb-3">What's Included</h5>
+                            <?php foreach (explode("\n", $packageDetails['inclusions']) as $inclusion): ?>
+                                <?php if (!empty(trim($inclusion))): ?>
+                                    <div class="inclusion-item">
+                                        <i class="bi bi-check-circle me-2"></i><?= htmlspecialchars(trim($inclusion)) ?>
+                                    </div>
                                 <?php endif; ?>
-                            </div>
-                            <small class="text-muted d-block">
-                                Valid until <?= date('M j, Y', strtotime($offer['end_date'])) ?>
-                            </small>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <div class="card shadow-sm">
-                    <div class="card-body text-center">
-                        <button class="btn btn-primary w-100 mb-2" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#packageInquiryModal"
-                                data-package-id="<?= $packageDetails['id'] ?>"
-                                data-package-title="<?= htmlspecialchars($packageDetails['title']) ?>">
-                            Inquire About This Package
-                        </button>
                         
-                        <a href="https://wa.me/94782024424?text=I'm%20interested%20in%20package%20<?= urlencode($packageDetails['title']) ?>" 
-                           class="btn btn-success w-100" target="_blank">
-                            <i class="bi bi-whatsapp"></i> Chat on WhatsApp
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <?php else: ?>
-        <!-- All Packages Listing -->
-        <h1 class="mb-4">Our Tour Packages</h1>
-        
-        <?php if (mysqli_num_rows($packagesResult) > 0): ?>
-        <div class="row">
-            <?php while ($package = mysqli_fetch_assoc($packagesResult)): 
-                $hasOffer = !is_null($package['best_offer_price']);
-            ?>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm position-relative">
-                    <img src="uploads/packages/<?= htmlspecialchars($package['image']) ?>" 
-                         class="card-img-top" 
-                         alt="<?= htmlspecialchars($package['title']) ?>"
-                         style="height: 200px; object-fit: cover;">
-                    
-                    <?php if ($hasOffer): ?>
-                    <span class="badge bg-danger price-badge">
-                        Special Offer
-                    </span>
-                    <?php endif; ?>
-                    
-                    <div class="card-body">
-                        <h3 class="card-title h5"><?= htmlspecialchars($package['title']) ?></h3>
-                        <p class="card-text text-muted small">
-                            <?= substr(htmlspecialchars($package['description']), 0, 100) ?>...
-                        </p>
+                        <div class="mb-4">
+                            <h5 class="mb-3">Not Included</h5>
+                            <?php foreach (explode("\n", $packageDetails['exclusions']) as $exclusion): ?>
+                                <?php if (!empty(trim($exclusion))): ?>
+                                    <div class="exclusion-item">
+                                        <i class="bi bi-x-circle me-2"></i><?= htmlspecialchars(trim($exclusion)) ?>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
                         
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-primary"><?= htmlspecialchars($package['duration']) ?> days</span>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-primary"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#packageInquiryModal"
+                                    data-package-id="<?= $packageDetails['id'] ?>"
+                                    data-package-title="<?= htmlspecialchars($packageDetails['title']) ?>">
+                                Learn More
+                            </button>
                             
-                            <div class="text-end">
-                                <?php if ($hasOffer): ?>
-                                <div>
-                                    <span class="original-price"><?= htmlspecialchars($package['price_range']) ?></span>
-                                    <span class="offer-price">$<?= number_format($package['best_offer_price'], 2) ?></span>
-                                </div>
-                                <?php else: ?>
-                                <span><?= htmlspecialchars($package['price_range']) ?></span>
-                                <?php endif; ?>
-                            </div>
+                            <a href="https://wa.me/94782024424?text=I'm%20interested%20in%20package%20<?= urlencode($packageDetails['title']) ?>" 
+                               class="action-btn btn-success" target="_blank">
+                                <i class="bi bi-whatsapp me-2"></i>Chat on WhatsApp
+                            </a>
                         </div>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <a href="packages.php?id=<?= $package['id'] ?>" class="btn btn-sm btn-outline-primary w-100">
-                            View Details
-                        </a>
                     </div>
                 </div>
             </div>
-            <?php endwhile; ?>
         </div>
-        <?php else: ?>
-        <div class="alert alert-info">
-            No packages available at the moment. Please check back later.
+    </div>
+    
+<?php else: ?>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1>Travel Packages</h1>
+            <p class="subtitle">Crafted for You</p>
+            <p>Discover stunning destinations, unique experiences, and custom itineraries that make your travel dreams real</p>
         </div>
-        <?php endif; ?>
-    <?php endif; ?>
-</main>
+    </div>
+
+    <!-- Packages Grid -->
+    <div class="packages-container">
+        <div class="container">
+            <?php if (mysqli_num_rows($packagesResult) > 0): ?>
+            <div class="packages-grid">
+                <?php while ($package = mysqli_fetch_assoc($packagesResult)): 
+                    $hasOffer = !is_null($package['best_offer_price']);
+                    $originalPrice = floatval(str_replace(['$', ','], '', $package['price_range']));
+                ?>
+                <div class="package-card" onclick="location.href='packages.php?id=<?= $package['id'] ?>'" data-hero-image="<?= !empty($package['hero_image']) ? 'uploads/hero_images/' . htmlspecialchars($package['hero_image']) : 'uploads/packages/' . htmlspecialchars($package['image']) ?>">
+                    <div class="package-card-image">
+                        <img src="uploads/packages/<?= htmlspecialchars($package['image']) ?>" 
+                             alt="<?= htmlspecialchars($package['title']) ?>">
+                        <div class="duration-badge"><?= htmlspecialchars($package['duration']) ?> Days Trip</div>
+                        <div class="package-overlay">
+                            <h3 class="package-title"><?= htmlspecialchars($package['title']) ?></h3>
+                            <p class="package-description">We offer more than just trips. We craft journeys that immerse you in the culture, history of every destination.</p>
+                        </div>
+                    </div>
+                    <div class="package-card-body">
+                        <div class="package-features">
+                            <div class="feature-item">
+                                <i class="bi bi-geo-alt"></i>
+                                Multiple Locations
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-people"></i>
+                                All Group Sizes
+                            </div>
+                        </div>
+                        
+                        <div class="package-pricing">
+                            <div class="price-section">
+                                <div class="price-from">From</div>
+                                <?php if ($hasOffer): ?>
+                                    <div class="price-amount">
+                                        <span class="original-price">$<?= number_format($originalPrice, 0) ?></span>
+                                        <span class="offer-price">$<?= number_format($package['best_offer_price'], 0) ?></span>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="price-amount">$<?= number_format($originalPrice, 0) ?></div>
+                                <?php endif; ?>
+                                <small class="text-muted">per person</small>
+                            </div>
+                            <a href="packages.php?id=<?= $package['id'] ?>" class="learn-more-btn">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endwhile; ?>
+            </div>
+            <?php else: ?>
+            <div class="text-center py-5">
+                <h3>No packages available at the moment</h3>
+                <p class="text-muted">Please check back later for exciting travel packages.</p>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
 
 <!-- Package Inquiry Modal -->
 <div class="modal fade" id="packageInquiryModal" tabindex="-1" aria-hidden="true">
@@ -387,6 +847,28 @@ if ($packageId > 0) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Hero image hover effect for package cards
+    const packageCards = document.querySelectorAll('.package-card');
+    const heroSection = document.querySelector('.hero-section');
+    
+    if (packageCards.length && heroSection) {
+        const defaultHero = heroSection.style.backgroundImage;
+        
+        packageCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const heroImage = this.getAttribute('data-hero-image');
+                if (heroImage) {
+                    heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${heroImage}')`;
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                heroSection.style.backgroundImage = defaultHero;
+            });
+        });
+    }
+
+    // Country code handling
     const countrySelect = document.getElementById('country');
     const countryCodePrefix = document.getElementById('country-code-prefix');
     const customCountryContainer = document.getElementById('customCountryContainer');
@@ -394,7 +876,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const countryCodeInput = document.getElementById('countryCode');
     const form = document.querySelector('#packageInquiryModal form');
     
-    // Update country code prefix and hidden field when country changes
     countrySelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         
@@ -402,23 +883,22 @@ document.addEventListener('DOMContentLoaded', function() {
             customCountryContainer.classList.remove('d-none');
             countryCodePrefix.textContent = '+';
             customCountryCode.focus();
-            countryCodeInput.value = ''; // Clear until user inputs
+            countryCodeInput.value = '';
         } else {
             customCountryContainer.classList.add('d-none');
             const code = selectedOption.getAttribute('data-code') || '';
             countryCodePrefix.textContent = '+' + code;
-            countryCodeInput.value = code; // Set the predefined code
+            countryCodeInput.value = code;
         }
     });
     
-    // Update hidden field when custom country code changes
     customCountryCode.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '');
         countryCodePrefix.textContent = '+' + this.value;
         countryCodeInput.value = this.value;
     });
     
-    // Initialize with default country if needed
+    // Initialize with default country
     const sriLankaOption = countrySelect.querySelector('option[value="Sri Lanka"]');
     if (sriLankaOption) {
         const code = sriLankaOption.getAttribute('data-code');
@@ -426,7 +906,7 @@ document.addEventListener('DOMContentLoaded', function() {
         countryCodeInput.value = code;
     }
     
-    // Before form submission, validate country code
+    // Form validation
     form.addEventListener('submit', function(e) {
         if (!countryCodeInput.value) {
             e.preventDefault();
@@ -434,12 +914,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Combine country code and phone number for full_phone
         const phoneNumber = document.getElementById('phoneNumber').value;
         document.getElementById('fullPhoneNumber').value = '+' + countryCodeInput.value + phoneNumber;
     });
 
-    // Initialize package inquiry modal with package data
+    // Package inquiry modal
     var inquiryModal = document.getElementById('packageInquiryModal');
     if (inquiryModal) {
         inquiryModal.addEventListener('show.bs.modal', function(event) {
@@ -453,22 +932,74 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalOfferPrice').value = offerPrice;
         });
     }
-});
 
-// AJAX form submission
-document.addEventListener('DOMContentLoaded', function() {
+    // Back to Top Button
+    const backToTop = document.getElementById("backToTop");
+    if (backToTop) {
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTop.style.display = "flex";
+            } else {
+                backToTop.style.display = "none";
+            }
+        });
+        
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+    }
+
+    // Smooth scrolling animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.package-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+
+    // Loading states for buttons
+    document.querySelectorAll('.learn-more-btn, .action-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (this.tagName === 'BUTTON' && this.type === 'submit') {
+                return;
+            }
+            
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 1000);
+        });
+    });
+
+    // AJAX form submission
     const inquiryForm = document.querySelector('#packageInquiryModal form');
-    
     if (inquiryForm) {
         inquiryForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Show loading state
             const submitBtn = inquiryForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
             
-            // Submit via AJAX
             fetch('process_inquiry.php', {
                 method: 'POST',
                 body: new FormData(inquiryForm)
@@ -476,25 +1007,51 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Close modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('packageInquiryModal'));
                     modal.hide();
                     
-                    // Redirect to thank-you page
-                    window.location.href = 'thank-you.php?inquiry_id=' + data.inquiry_id;
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                    successAlert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+                    successAlert.innerHTML = `
+                        <strong>Success!</strong> Your inquiry has been submitted successfully.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(successAlert);
+                    
+                    setTimeout(() => {
+                        if (successAlert.parentNode) {
+                            successAlert.parentNode.removeChild(successAlert);
+                        }
+                    }, 5000);
+                    
+                    inquiryForm.reset();
                 } else {
-                    alert('Error: ' + data.message);
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Submit Inquiry';
+                    alert('Error: ' + (data.message || 'Something went wrong. Please try again.'));
                 }
             })
             .catch(error => {
+                console.error('Error:', error);
                 alert('An error occurred. Please try again.');
+            })
+            .finally(() => {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Inquiry';
+                submitBtn.innerHTML = originalText;
             });
         });
     }
+
+    // Floating buttons animation
+    const floatingBtns = document.querySelectorAll('.floating-btn');
+    floatingBtns.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.animation = 'none';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.animation = 'pulse 2s infinite';
+        });
+    });
 });
 </script>
 </body>

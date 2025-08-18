@@ -17,24 +17,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_active = isset($_POST['is_active']) ? 1 : 0;
         $sort_order = (int)$_POST['sort_order'];
         
-        // Handle image upload
+        // Handle featured image upload
         $image = '';
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = 'uploads/packages/';
+            $upload_dir = '../uploads/packages/';
             if (!file_exists($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
-            $file_name = uniqid() . '_' . basename($_FILES['image']['name']);
-            $target_path = $upload_dir . $file_name;
             
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
-                $image = $file_name;
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $file_type = mime_content_type($_FILES['image']['tmp_name']);
+            
+            if (in_array($file_type, $allowed_types)) {
+                $file_ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $file_name = 'package_' . uniqid() . '.' . $file_ext;
+                $target_path = $upload_dir . $file_name;
+                
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
+                    $image = $file_name;
+                }
             }
         }
         
-        $query = "INSERT INTO tour_packages 
-                  (title, description, itinerary, duration, price_range, difficulty, image, is_active, sort_order, inclusions, exclusions, created_at) 
-                  VALUES ('$title', '$description', '$itinerary', '$duration', '$price_range', '$difficulty', '$image', $is_active, $sort_order, '$inclusions', '$exclusions', NOW())";
+        // Handle hero image upload
+        $hero_image = '';
+        if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = '../uploads/hero_images/';
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $file_type = mime_content_type($_FILES['hero_image']['tmp_name']);
+            
+            if (in_array($file_type, $allowed_types)) {
+                $file_ext = pathinfo($_FILES['hero_image']['name'], PATHINFO_EXTENSION);
+                $file_name = 'hero_' . uniqid() . '.' . $file_ext;
+                $target_path = $upload_dir . $file_name;
+                
+                if (move_uploaded_file($_FILES['hero_image']['tmp_name'], $target_path)) {
+                    $hero_image = $file_name;
+                }
+            }
+        }
+        
+        $query = "INSERT INTO tour_packages (title, description, itinerary, duration, price_range, 
+                  difficulty, image, hero_image, is_active, sort_order, inclusions, exclusions)
+                  VALUES ('$title', '$description', '$itinerary', '$duration', '$price_range',
+                  '$difficulty', '$image', '$hero_image', $is_active, $sort_order, '$inclusions', '$exclusions')";
         
         if (mysqli_query($conn, $query)) {
             $_SESSION['message'] = "Package added successfully!";
@@ -60,21 +90,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $is_active = isset($_POST['is_active']) ? 1 : 0;
         $sort_order = (int)$_POST['sort_order'];
         
-        // Handle image upload if new image is provided
+        // Handle featured image update
         $image_update = '';
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = 'uploads/packages/';
-            $file_name = uniqid() . '_' . basename($_FILES['image']['name']);
-            $target_path = $upload_dir . $file_name;
+            $upload_dir = '../uploads/packages/';
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $file_type = mime_content_type($_FILES['image']['tmp_name']);
             
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
-                $image_update = ", image = '$file_name'";
+            if (in_array($file_type, $allowed_types)) {
+                $file_ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $file_name = 'package_' . uniqid() . '.' . $file_ext;
+                $target_path = $upload_dir . $file_name;
                 
-                // Delete old image if exists
-                $old_image_query = mysqli_query($conn, "SELECT image FROM tour_packages WHERE id = $id");
-                if ($old_image = mysqli_fetch_assoc($old_image_query)) {
-                    if (!empty($old_image['image']) && file_exists($upload_dir . $old_image['image'])) {
-                        unlink($upload_dir . $old_image['image']);
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_path)) {
+                    $image_update = ", image = '$file_name'";
+                    
+                    // Delete old image
+                    $old_image_query = mysqli_query($conn, "SELECT image FROM tour_packages WHERE id = $id");
+                    if ($old_image = mysqli_fetch_assoc($old_image_query)) {
+                        if (!empty($old_image['image']) && file_exists($upload_dir . $old_image['image'])) {
+                            unlink($upload_dir . $old_image['image']);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Handle hero image update
+        $hero_image_update = '';
+        if (isset($_FILES['hero_image'])) {
+            if ($_FILES['hero_image']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = '../uploads/hero_images/';
+                $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+                $file_type = mime_content_type($_FILES['hero_image']['tmp_name']);
+                
+                if (in_array($file_type, $allowed_types)) {
+                    $file_ext = pathinfo($_FILES['hero_image']['name'], PATHINFO_EXTENSION);
+                    $file_name = 'hero_' . uniqid() . '.' . $file_ext;
+                    $target_path = $upload_dir . $file_name;
+                    
+                    if (move_uploaded_file($_FILES['hero_image']['tmp_name'], $target_path)) {
+                        $hero_image_update = ", hero_image = '$file_name'";
+                        
+                        // Delete old hero image
+                        $old_hero_query = mysqli_query($conn, "SELECT hero_image FROM tour_packages WHERE id = $id");
+                        if ($old_hero = mysqli_fetch_assoc($old_hero_query)) {
+                            if (!empty($old_hero['hero_image']) && file_exists($upload_dir . $old_hero['hero_image'])) {
+                                unlink($upload_dir . $old_hero['hero_image']);
+                            }
+                        }
+                    }
+                }
+            } elseif (isset($_POST['remove_hero_image'])) {
+                $hero_image_update = ", hero_image = ''";
+                $upload_dir = '../uploads/hero_images/';
+                $old_hero_query = mysqli_query($conn, "SELECT hero_image FROM tour_packages WHERE id = $id");
+                if ($old_hero = mysqli_fetch_assoc($old_hero_query)) {
+                    if (!empty($old_hero['hero_image']) && file_exists($upload_dir . $old_hero['hero_image'])) {
+                        unlink($upload_dir . $old_hero['hero_image']);
                     }
                 }
             }
@@ -92,6 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   inclusions = '$inclusions',
                   exclusions = '$exclusions'
                   $image_update
+                  $hero_image_update
                   WHERE id = $id";
         
         if (mysqli_query($conn, $query)) {
@@ -109,19 +183,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     
-    // First get the image path to delete it
-    $query = "SELECT image FROM tour_packages WHERE id = $id";
+    // Get image paths to delete them
+    $query = "SELECT image, hero_image FROM tour_packages WHERE id = $id";
     $result = mysqli_query($conn, $query);
     $package = mysqli_fetch_assoc($result);
     
-    if ($package && !empty($package['image'])) {
-        $image_path = 'uploads/packages/' . $package['image'];
-        if (file_exists($image_path)) {
-            unlink($image_path);
+    if ($package) {
+        // Delete featured image
+        if (!empty($package['image'])) {
+            $image_path = '../uploads/packages/' . $package['image'];
+            if (file_exists($image_path)) {
+                unlink($image_path);
+            }
+        }
+        
+        // Delete hero image
+        if (!empty($package['hero_image'])) {
+            $hero_path = '../uploads/hero_images/' . $package['hero_image'];
+            if (file_exists($hero_path)) {
+                unlink($hero_path);
+            }
         }
     }
     
-    // Now delete the package
+    // Delete the package
     $query = "DELETE FROM tour_packages WHERE id = $id";
     if (mysqli_query($conn, $query)) {
         $_SESSION['message'] = "Package deleted successfully!";
@@ -149,6 +234,11 @@ $packages = mysqli_query($conn, "SELECT * FROM tour_packages ORDER BY sort_order
         .package-image {
             max-width: 100px;
             max-height: 60px;
+            object-fit: cover;
+        }
+        .hero-image-preview {
+            max-width: 200px;
+            max-height: 100px;
             object-fit: cover;
         }
     </style>
@@ -201,7 +291,7 @@ $packages = mysqli_query($conn, "SELECT * FROM tour_packages ORDER BY sort_order
                         <td><?= $package['id']; ?></td>
                         <td>
                             <?php if (!empty($package['image'])): ?>
-                                <img src="uploads/packages/<?= htmlspecialchars($package['image']); ?>" alt="<?= htmlspecialchars($package['title']); ?>" class="package-image">
+                                <img src="../uploads/packages/<?= htmlspecialchars($package['image']); ?>" alt="<?= htmlspecialchars($package['title']); ?>" class="package-image">
                             <?php else: ?>
                                 <span class="text-muted">No image</span>
                             <?php endif; ?>
@@ -277,6 +367,11 @@ $packages = mysqli_query($conn, "SELECT * FROM tour_packages ORDER BY sort_order
                             <div class="col-md-6">
                                 <label for="image" class="form-label">Featured Image</label>
                                 <input type="file" class="form-control" id="image" name="image">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="hero_image" class="form-label">Hero Image</label>
+                                <input type="file" class="form-control" id="hero_image" name="hero_image">
+                                <div class="form-text">Recommended size: 1920x1080 pixels</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="sort_order" class="form-label">Sort Order</label>
@@ -356,8 +451,23 @@ $packages = mysqli_query($conn, "SELECT * FROM tour_packages ORDER BY sort_order
                                 <input type="file" class="form-control" id="edit_image" name="image">
                                 <div class="mt-2" id="current_image_container">
                                     <small>Current Image:</small>
-                                    <img id="current_image" src="" class="package-image d-block mt-1">
+                                    <img id="current_image" src="" class="package-image d-block mt-1" style="display:none;">
+                                    <span id="no_image" class="text-muted">No image</span>
                                 </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_hero_image" class="form-label">Hero Image</label>
+                                <input type="file" class="form-control" id="edit_hero_image" name="hero_image">
+                                <div class="mt-2" id="current_hero_container">
+                                    <small>Current Hero Image:</small>
+                                    <img id="current_hero_image" src="" class="hero-image-preview d-block mt-1" style="display:none;">
+                                    <span id="no_hero_image" class="text-muted">No hero image</span>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="remove_hero_image" name="remove_hero_image">
+                                        <label class="form-check-label" for="remove_hero_image">Remove current hero image</label>
+                                    </div>
+                                </div>
+                                <div class="form-text">Recommended size: 1920x1080 pixels</div>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_sort_order" class="form-label">Sort Order</label>
@@ -394,52 +504,63 @@ $packages = mysqli_query($conn, "SELECT * FROM tour_packages ORDER BY sort_order
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Handle edit button clicks
-            $('.edit-package').click(function() {
-                var packageId = $(this).data('id');
-                
-                // Fetch package data via AJAX
-                $.ajax({
-                    url: 'includes/get-package.php',
-                    type: 'GET',
-                    data: { id: packageId },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            // Populate the edit form with package data
-                            $('#edit_id').val(response.id);
-                            $('#edit_title').val(response.title);
-                            $('#edit_description').val(response.description);
-                            $('#edit_itinerary').val(response.itinerary);
-                            $('#edit_duration').val(response.duration);
-                            $('#edit_price_range').val(response.price_range);
-                            $('#edit_difficulty').val(response.difficulty);
-                            $('#edit_sort_order').val(response.sort_order);
-                            $('#edit_inclusions').val(response.inclusions);
-                            $('#edit_exclusions').val(response.exclusions);
-                            $('#edit_is_active').prop('checked', response.is_active == 1);
-                            
-                            // Handle image display
-                            if (response.image) {
-                                $('#current_image').attr('src', 'uploads/packages/' + response.image);
-                                $('#current_image_container').show();
-                            } else {
-                                $('#current_image_container').hide();
-                            }
-                            
-                            // Show the modal
-                            var editModal = new bootstrap.Modal(document.getElementById('editPackageModal'));
-                            editModal.show();
-                        } else {
-                            alert('Error loading package data');
-                        }
-                    },
-                    error: function() {
-                        alert('Error loading package data');
+    // Handle edit button clicks
+    $('.edit-package').click(function() {
+        var packageId = $(this).data('id');
+        
+        // Fetch package data via AJAX
+        $.ajax({
+            url: 'get-package.php',
+            type: 'GET',
+            data: { id: packageId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Populate the edit form with package data
+                    $('#edit_id').val(response.id);
+                    $('#edit_title').val(response.title);
+                    $('#edit_description').val(response.description);
+                    $('#edit_itinerary').val(response.itinerary);
+                    $('#edit_duration').val(response.duration);
+                    $('#edit_price_range').val(response.price_range);
+                    $('#edit_difficulty').val(response.difficulty);
+                    $('#edit_sort_order').val(response.sort_order);
+                    $('#edit_inclusions').val(response.inclusions);
+                    $('#edit_exclusions').val(response.exclusions);
+                    $('#edit_is_active').prop('checked', response.is_active == 1);
+                    
+                    // Handle featured image display
+                    if (response.image && response.image !== '') {
+                        $('#current_image').attr('src', '../uploads/packages/' + response.image).show();
+                        $('#no_image').hide();
+                    } else {
+                        $('#current_image').hide();
+                        $('#no_image').show();
                     }
-                });
-            });
+                    
+                    // Handle hero image display
+                    if (response.hero_image && response.hero_image !== '') {
+                        $('#current_hero_image').attr('src', '../uploads/hero_images/' + response.hero_image).show();
+                        $('#no_hero_image').hide();
+                    } else {
+                        $('#current_hero_image').hide();
+                        $('#no_hero_image').show();
+                    }
+                    
+                    // Show the modal
+                    var editModal = new bootstrap.Modal(document.getElementById('editPackageModal'));
+                    editModal.show();
+                } else {
+                    alert('Error loading package data: ' + (response.message || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('AJAX Error: ' + error);
+                console.error(xhr.responseText);
+            }
         });
+    });
+});
     </script>
 </body>
 </html>

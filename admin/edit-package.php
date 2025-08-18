@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = mysqli_real_escape_string($conn, $_POST['price']);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
     
-    // Handle image update
+    // Handle featured image update
     $featured_image = $package['featured_image'];
     if (isset($_FILES['featured_image']) && $_FILES['featured_image']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = '../uploads/packages/';
@@ -42,6 +42,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
+    // Handle hero image update
+    $hero_image = $package['hero_image'];
+    if (isset($_FILES['hero_image']) {
+        if ($_FILES['hero_image']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = '../uploads/hero_images/';
+            $file_name = uniqid() . '_' . basename($_FILES['hero_image']['name']);
+            $target_path = $upload_dir . $file_name;
+            
+            if (move_uploaded_file($_FILES['hero_image']['tmp_name'], $target_path)) {
+                // Delete old hero image if exists
+                if ($hero_image && file_exists($upload_dir . $hero_image)) {
+                    unlink($upload_dir . $hero_image);
+                }
+                $hero_image = $file_name;
+            }
+        } elseif (isset($_POST['remove_hero_image'])) {
+            // Handle hero image removal
+            if ($hero_image && file_exists($upload_dir . $hero_image)) {
+                unlink($upload_dir . $hero_image);
+            }
+            $hero_image = '';
+        }
+    }
+    
     $query = "UPDATE tour_packages SET 
               title = '$title',
               subtitle = '$subtitle',
@@ -51,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               inclusions = '$inclusions',
               price = '$price',
               featured_image = '$featured_image',
+              hero_image = '$hero_image',
               is_active = $is_active
               WHERE id = $package_id";
     
@@ -87,6 +112,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="col-md-12">
                     <label for="title" class="form-label">Package Title</label>
                     <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($package['title']); ?>" required>
+                </div>
+                <div class="col-md-12">
+                    <label for="hero_image" class="form-label">Hero Image (Large banner image)</label>
+                    <?php if ($package['hero_image']): ?>
+                        <div class="mb-3">
+                            <img src="../uploads/hero_images/<?= $package['hero_image']; ?>" alt="Current hero image" class="img-thumbnail" style="max-height: 150px;">
+                            <div class="form-text">Current hero image</div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="remove_hero_image" name="remove_hero_image">
+                                <label class="form-check-label" for="remove_hero_image">Remove current hero image</label>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <input type="file" class="form-control" id="hero_image" name="hero_image">
+                    <div class="form-text">Recommended size: 1920x1080 pixels</div>
                 </div>
                 <div class="col-md-12">
                     <label for="subtitle" class="form-label">Subtitle (Ideal for...)</label>

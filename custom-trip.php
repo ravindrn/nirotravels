@@ -50,76 +50,268 @@ if (!$accommodationsResult) {
     <title>Build Your Custom Trip | Niro SL Travels</title>
     <?php include 'components/header.php' ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
-    <style>
-        .trip-builder-section {
-            padding: 60px 0;
-        }
-        .builder-card {
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-        .builder-card-header {
-            background-color: #0c2261;
-            color: white;
-            padding: 15px 20px;
-        }
-        .selected-items-container {
-            min-height: 150px;
-            border: 2px dashed #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            background-color: #f8fafc;
-        }
-        .selected-item {
-            background-color: white;
-            border-radius: 8px;
-            padding: 12px 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-        }
-        .selected-item:hover {
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-        .remove-item {
-            background: none;
-            border: none;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s;
-        }
-        .remove-item:hover {
-            background-color: #f8d7da;
-            color: #dc3545;
-        }
-        .trip-summary {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            position: sticky;
-            top: 20px;
-        }
-        .bi {
-            font-size: 1.1rem;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --brand-blue:#0c2261;
+        --brand-blue-600:#0a1d52;
+        --brand-blue-700:#081946;
+        --ink:#0b0f1a;
+        --black:#000;
+        --white:#fff;
+        --muted:#6c757d;
+        --ring: 0 0 0 .25rem rgba(12,34,97,.15);
+    }
+
+    /* Typography */
+    body{
+        font-family:'Urbanist', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+        color:#0f1629;
+        background: linear-gradient(180deg,#f9fbff 0%, #ffffff 60%) fixed;
+    }
+    h1,h2,h3,h4,h5,h6,.builder-card-header h3{
+        font-family:'Playfair Display', Georgia, 'Times New Roman', serif;
+        letter-spacing:.2px;
+        color:var(--brand-blue);
+    }
+    .lead{color:#42506b}
+
+    /* Section spacing */
+    .trip-builder-section{padding: clamp(40px, 6vw, 80px) 0}
+
+    /* Container feel */
+    .container{
+        max-width:1140px
+    }
+
+    /* Cards */
+.builder-card{
+    border:1px solid rgba(12,34,97,.08);
+    border-radius:18px;
+    overflow:hidden;
+    background:#fff;
+    box-shadow:0 10px 30px rgba(6,21,60,.06);
+    transition:transform .25s ease, box-shadow .25s ease;
+}
+.builder-card:hover{
+    transform: translateY(-2px);
+    box-shadow:0 18px 44px rgba(6,21,60,.10);
+}
+
+/* Card header updated */
+.builder-card-header{
+    background: #0c2261; /* solid dark blue */
+    color: #fff; /* white text */
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.builder-card-header * {
+    color: #fff !important;
+}
+
+    .builder-card .card-body{padding:22px}
+
+    /* Custom form look */
+    .form-check-input{
+        width:1.2rem;height:1.2rem;cursor:pointer;border:2px solid #cfd6e4
+    }
+    .form-check-input:checked{
+        background-color:var(--brand-blue);
+        border-color:var(--brand-blue);
+        box-shadow: var(--ring);
+    }
+    .form-check-label{cursor:pointer}
+
+    /* Selected area */
+    .selected-items-container{
+        min-height:150px;border:1px dashed #d9e1f5;border-radius:14px;
+        padding:18px;margin-top:16px;background:#f7f9ff;
+    }
+    .selected-item{
+        background: #ffffff;
+        border:1px solid rgba(12,34,97,.08);
+        border-radius:12px;
+        padding:12px 14px;margin-bottom:10px;
+        display:flex;align-items:center;gap:12px;
+        box-shadow:0 4px 14px rgba(6,21,60,.05);
+        transition:background .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    .selected-item:hover{
+        transform: translateY(-1px);
+        box-shadow:0 10px 26px rgba(6,21,60,.08);
+    }
+
+    /* Remove pill */
+    .remove-item{
+        border:0;background:#f0f3ff;width:32px;height:32px;border-radius:10px;
+        display:grid;place-items:center;color:#1f3a8a;
+        transition:all .2s ease;
+    }
+    .remove-item:hover{background:#ffe9ec;color:#c1121f}
+
+    /* List blocks */
+    .activity-item,.accommodation-item{
+        padding:12px 14px;border-radius:12px;border:1px solid rgba(12,34,97,.06);
+        background:#fff;transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+    }
+    .activity-item:hover,.accommodation-item:hover{
+        box-shadow:0 10px 24px rgba(6,21,60,.08);transform:translateY(-2px);border-color:rgba(12,34,97,.18)
+    }
+
+/* Summary panel */
+/* Summary panel */
+.trip-summary {
+    background: #0c2261; /* solid dark blue */
+    color: #fff; /* set default text color to white */
+    border-radius: 0;
+    padding: 22px;
+    box-shadow: 0 16px 40px rgba(3,9,28,.35);
+    margin-top: 155px;
+    border: 1px solid rgba(255,255,255,.06);
+}
+
+/* Ensure all text inside summary is white */
+.trip-summary,
+.trip-summary * {
+    color: #fff !important;
+}
+
+/* Remove any text-muted classes inside summary */
+.trip-summary .text-muted {
+    color: rgba(255,255,255,0.8) !important;
+}
+/* Headings inside summary */
+.trip-summary h3,
+.trip-summary h5 {
+    color: #fff; /* white headings */
+}
+
+/* List items inside summary */
+.trip-summary ul li {
+    border-bottom: 1px dashed rgba(255,255,255,.08);
+    padding: 8px 0;
+    color: #fff; /* make all list items white */
+}
+
+/* Last list item */
+.trip-summary ul li:last-child {
+    border-bottom: 0;
+}
+
+/* Submit Trip Inquiry Button (white outline, thin) */
+#submit-trip-btn {
+    border: 1px solid #fff; /* reduced border width */
+    color: #fff;
+    width: 250px;
+    background: transparent;
+    border-radius: 12px;
+    padding: .8rem 1rem;
+    font-weight: 600;
+    transition: all .3s ease;
+}
+
+#submit-trip-btn:hover:enabled {
+    background: #fff;
+    color: #0c2261;
+    border-color: #fff;
+}
+
+/* Disabled state */
+#submit-trip-btn:disabled {
+    opacity: .7;
+    cursor: not-allowed;
+}
+
+/* Primary button */
+.btn-primary {
+    --bs-btn-bg: var(--brand-blue);
+    --bs-btn-border-color: var(--brand-blue);
+    --bs-btn-hover-bg: #0a1d52;
+    --bs-btn-hover-border-color: #0a1d52;
+    --bs-btn-focus-shadow-rgb: 12,34,97;
+    border-radius: 12px;
+    padding: .8rem 1rem;
+    font-weight: 600;
+    box-shadow: 0 10px 20px rgba(12,34,97,.20);
+}
+
+.btn:disabled {
+    opacity: .7;
+}
+
+/* Custom Trip Button */
+.btn-custom-trip {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: .8rem 1.2rem;
+    font-weight: 600;
+    border-radius: 0; /* sharp corners */
+    transition: all .3s ease;
+}
+
+.btn-custom-trip:hover {
+    background: #fff;
+    color: var(--brand-blue);
+    border-color: #fff;
+    font-weight: 700;
+}
+
+    /* Modal polish */
+    .modal-content{border-radius:18px;border:1px solid rgba(12,34,97,.08)}
+    .modal-header{background:#f5f7ff}
+    .modal-title{font-family:'Playfair Display';color:var(--brand-blue)}
+    .form-control,.form-select{
+        border-radius:12px;border:1px solid #cbd5e1;
+        padding:.7rem .9rem;
+    }
+    .form-control:focus,.form-select:focus{
+        border-color:var(--brand-blue);box-shadow:var(--ring);
+    }
+    .input-group-text{border-radius:12px;border:1px solid #cbd5e1;background:#f8fbff}
+
+    /* Icon sizing */
+    .bi{font-size:1.05rem}
+
+    /* Badges for small meta texts */
+    .badge-soft{
+        background:#eef2ff;border:1px solid #dfe6ff;color:#1e3a8a;
+        padding:.2rem .5rem;border-radius:999px;font-weight:600
+    }
+
+    /* Helpers */
+    .fade-in-up{
+        animation:fadeInUp .5s ease both;
+    }
+    @keyframes fadeInUp{
+        from{opacity:0;transform:translateY(8px)}
+        to{opacity:1;transform:translateY(0)}
+    }
+
+    /* Dark accents for headings section */
+    .page-intro{
+        background:
+          radial-gradient(1200px 400px at 10% -20%, rgba(12,34,97,.12), transparent 60%),
+          radial-gradient(1200px 400px at 110% -10%, rgba(12,34,97,.10), transparent 60%);
+        border:1px solid rgba(12,34,97,.06);
+        border-radius:16px;padding:18px 18px;margin-bottom:18px;
+    }
+
+    /* Responsive refinements */
+    @media (max-width: 991.98px){
+        .trip-summary{position:static;margin-top:18px}
+    }
+</style>
+
 </head>
 <body>
     <section class="trip-builder-section">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="mb-4">Build Your Custom Sri Lanka Trip</h1>
+                    <h1 style="font-weight:bold;" class="mb-4">Build Your Custom Sri Lanka Trip</h1>
                     <p class="lead mb-5">Select destinations, activities, and accommodations to create your perfect itinerary.</p>
                     
                     <!-- Destinations Selection -->
@@ -348,11 +540,12 @@ if (!$accommodationsResult) {
                         
                         <hr>
                         
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary btn-lg" id="submit-trip-btn" disabled>
+                            <div class="d-grid gap-2">
+                            <button class="btn btn-outline-light btn-lg px-4 py-2" id="submit-trip-btn" disabled>
                                 Submit Trip Inquiry
                             </button>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -724,8 +917,8 @@ if (!$accommodationsResult) {
             const summaryContainer = document.getElementById('summary-accommodation');
             
             if (!selectedAccommodation) {
-                container.innerHTML = '<div class="text-center py-4"><i class="bi bi-house fs-1 text-muted"></i><p class="text-muted mt-2">No accommodation selected yet</p></div>';
-                summaryContainer.innerHTML = '<li class="text-muted">None selected</li>';
+                container.innerHTML = '<div style="color:white; class="text-center py-4"><i class="bi bi-house fs-1 text-muted"></i><p class="text-muted mt-2">No accommodation selected yet</p></div>';
+                summaryContainer.innerHTML = '<li class="text-muted" style="color:white;">None selected</li>';
                 return;
             }
             
